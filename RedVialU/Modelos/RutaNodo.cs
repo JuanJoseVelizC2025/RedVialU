@@ -11,6 +11,7 @@ namespace RedVialU.Modelos
     public class RutaNodo
     {
         public Nodo Nodo { get; set; }
+      
 
         public RutaNodo Siguiente { get; set; }
 

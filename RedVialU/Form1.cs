@@ -64,6 +64,12 @@ namespace RedVialU
             DibujarNodo(nodoSur, xCentro, yCentro + (size + 40), "Sur");
             DibujarNodo(nodoEste, xCentro + (size + 40), yCentro, "Este");
             DibujarNodo(nodoOeste, xCentro - (size + 40), yCentro, "Oeste");
+
+
+
+
+
+            
         }
 
         private void DibujarNodo(Nodo nodo, int x, int y, string texto)
@@ -90,6 +96,9 @@ namespace RedVialU
                 $"Semáforo: {(nodo.Info.TieneSemaforo ? nodo.Info.EstadoSemaforo : "No tiene")}");
 
             panelMapa.Controls.Add(btn);
+
+
+
         }
 
         private void btnSimularFlujo_Click(object sender, EventArgs e)
@@ -100,7 +109,7 @@ namespace RedVialU
             if (destino != null)
             {
                 redVial.SimularFlujoVehiculos(origen, destino, 3);
-                MessageBox.Show("Se movieron 3 vehículos del nodo central al nodo norte.");
+                MessageBox.Show($"Se movieron 3 vehículos del nodo {origen} central al nodo norte {destino}.");
                 DibujarRedInicial();
                 LlenarComboBoxConNodos();
             }
@@ -204,7 +213,8 @@ namespace RedVialU
                 return;
             }
 
-            var ruta = redVial.BuscarRuta(origen, destino);
+            var (ruta, tiempoTotal) = redVial.SimularRutaVehicular(origen, destino, 2);
+
 
             if (ruta == null)
             {
@@ -221,6 +231,44 @@ namespace RedVialU
         {
 
         }
+
+        private void btnSimularRutaVehicular_Click(object sender, EventArgs e)
+        {
+            Nodo origen = cbOrigen.SelectedItem as Nodo;
+            Nodo destino = cbDestino.SelectedItem as Nodo;
+
+            if (origen == null || destino == null)
+            {
+                MessageBox.Show("Seleccione ambos nodos.");
+                return;
+            }
+
+            var (ruta, tiempoTotal) = redVial.SimularRutaVehicular(origen, destino, 2);
+
+            if (ruta == null)
+            {
+                MessageBox.Show("No se encontró una ruta entre los nodos seleccionados.");
+                return;
+            }
+
+            string textoRuta = "";
+            RutaNodo actual = ruta.Cabeza;
+
+            while (actual != null)
+            {
+                textoRuta += actual.Nodo.Nombre;
+                if (actual.Siguiente != null)
+                    textoRuta += " ? ";
+                actual = actual.Siguiente;
+            }
+
+            MessageBox.Show($"Ruta: {textoRuta}\nTiempo total estimado: {tiempoTotal} unidades\nVehículos simulados: 2");
+
+            DibujarRedInicial();
+
+        }
+
+
     }
 }
 

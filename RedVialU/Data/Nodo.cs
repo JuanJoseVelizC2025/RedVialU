@@ -18,8 +18,11 @@ namespace RedVialU.Data
         public Nodo Sur { get; set; }
         public Nodo Este { get; set; }
         public Nodo Oeste { get; set; }
+        public int PosicionX { get; set; }
+        public int PosicionY { get; set; }
 
-       public Nodo(InformacionInterseccion info)
+
+        public Nodo(InformacionInterseccion info)
         {
             Info = info;
             Norte = null;

@@ -11,6 +11,7 @@ namespace RedVialU.Data
     public class RedVial
     {
         public Nodo? InterseccionCentral { get; set; }
+        
 
         public RedVial()
         {
@@ -127,11 +128,12 @@ namespace RedVialU.Data
             return -1;
         }
 
-        public RutaEnlazada BuscarRuta(Nodo origen, Nodo destino)
+        public (RutaEnlazada ruta, int tiempoTotal) SimularRutaVehicular(Nodo origen, Nodo destino, int cantidadVehiculos)
         {
-            if (origen == null || destino == null) return null;
+            if (origen == null || destino == null)
+                return (null, -1);
 
-            ColaNodo cola = new ColaNodo(); // Cola para rutas en exploración
+            ColaNodo cola = new ColaNodo(); // Cola de rutas
             RutaEnlazada rutaInicial = new RutaEnlazada();
             rutaInicial.Agregar(origen);
             cola.Encolar(rutaInicial);
@@ -141,36 +143,60 @@ namespace RedVialU.Data
             while (!cola.EstaVacia())
             {
                 RutaEnlazada rutaActual = cola.Desencolar();
-                RutaNodo ultimo = rutaActual.Cabeza;
+                RutaNodo actualRutaNodo = rutaActual.Cabeza;
 
-                
+                // Obtener el último nodo de la ruta
+                while (actualRutaNodo.Siguiente != null)
+                    actualRutaNodo = actualRutaNodo.Siguiente;
 
-                while (ultimo.Siguiente != null)
-                    ultimo = ultimo.Siguiente;
-
-                Nodo actual = ultimo.Nodo;
+                Nodo actual = actualRutaNodo.Nodo;
 
                 if (actual == destino)
                 {
-                    return rutaActual; // Ruta encontrada
+                    int tiempoTotal = 0;
+                    RutaNodo nodoRuta = rutaActual.Cabeza;
+
+                    while (nodoRuta != null && nodoRuta.Siguiente != null)
+                    {
+                        Nodo desde = nodoRuta.Nodo;
+                        Nodo hacia = nodoRuta.Siguiente.Nodo;
+
+                        tiempoTotal += (int)desde.Info.TiempoPromedioTransito;
+
+                        if (desde.Info.TieneSemaforo && desde.Info.EstadoSemaforo == "Rojo")
+                            tiempoTotal += 3;
+
+                        SimularFlujoVehiculos(desde, hacia, cantidadVehiculos);
+
+                        nodoRuta = nodoRuta.Siguiente;
+                    }
+
+                    return (rutaActual, tiempoTotal);
                 }
 
-                // Expandir a vecinos si no han sido visitados en la ruta actual
-                if (actual.Norte != null && !rutaActual.Contiene(actual.Norte))
-                    cola.Encolar(rutaActual.ClonarYAgregar(actual.Norte));
+                if (!visitados.Contiene(actual))
+                {
+                    visitados.Agregar(actual);
 
-                if (actual.Sur != null && !rutaActual.Contiene(actual.Sur))
-                    cola.Encolar(rutaActual.ClonarYAgregar(actual.Sur));
+                    // Explorar vecinos
+                    if (actual.Norte != null && !rutaActual.Contiene(actual.Norte))
+                        cola.Encolar(rutaActual.ClonarYAgregar(actual.Norte));
 
-                if (actual.Este != null && !rutaActual.Contiene(actual.Este))
-                    cola.Encolar(rutaActual.ClonarYAgregar(actual.Este));
+                    if (actual.Sur != null && !rutaActual.Contiene(actual.Sur))
+                        cola.Encolar(rutaActual.ClonarYAgregar(actual.Sur));
 
-                if (actual.Oeste != null && !rutaActual.Contiene(actual.Oeste))
-                    cola.Encolar(rutaActual.ClonarYAgregar(actual.Oeste));
+                    if (actual.Este != null && !rutaActual.Contiene(actual.Este))
+                        cola.Encolar(rutaActual.ClonarYAgregar(actual.Este));
+
+                    if (actual.Oeste != null && !rutaActual.Contiene(actual.Oeste))
+                        cola.Encolar(rutaActual.ClonarYAgregar(actual.Oeste));
+                }
             }
 
-            return null; // No se encontró ruta
+            return (null, -1); // No se encontró una ruta
         }
+
+        
 
 
 
